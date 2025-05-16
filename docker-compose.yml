@@ -1,0 +1,17 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "3000:3000"  # API
+      - "9229:9229"  # Debug
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    command: node --inspect=0.0.0.0:9229 index.cjs
+    env_file:        # 👈 agregá esta línea
+      - .env         # 👈 y esta
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3001:80"  # 👈 Exponemos el puerto 80 afuera como 3001

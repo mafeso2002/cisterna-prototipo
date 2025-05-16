@@ -1,0 +1,23 @@
+Levantar el backend
+ - CD C:\NodeMCUCisterna
+ - node index.cjs
+ - docker run -p 3000:3000 mi-backend
+ - docker-compose up
+ - docker-compose up -d
+ - docker-compose down
+ - docker-compose build   __> si agrego una nueva librería, etc y luego  docker-compose up
+
+Si da error por ema puerto: docker ps
+y luego docker stop <ID>
+
+
+
+
+Levantar el FrontEnd
+ - CD C:\NodeMCUCisternaFront\cisterna-frontend
+ - npm start
+
+
+
+4593 5400 1168 6458
+02/26

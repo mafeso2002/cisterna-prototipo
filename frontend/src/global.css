@@ -1,0 +1,18 @@
+@keyframes moverBurbujas {
+    0% {
+      background-position: 0 0, 0 0;
+    }
+    100% {
+      background-position: 0 100px, 0 100px;
+    }
+  }
+
+  .evento-interactivo {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.evento-interactivo:hover {
+  filter: brightness(1.1);
+}
+  
