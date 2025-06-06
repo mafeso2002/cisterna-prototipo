@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Typography, Box, Table, TableBody, TableCell,
-  TableContainer, TableHead, TableRow, Paper,
-  TablePagination, Button, Stack, Dialog, DialogTitle,
-  DialogContent, DialogActions, TextField, Snackbar, Alert
+  Typography, Box, Table, TableBody, TableCell, TableContainer, TableHead,
+  TableRow, Paper, TablePagination, Button, Stack, Dialog, DialogTitle,
+  DialogContent, DialogActions, TextField, Snackbar, Alert, FormControl,
+  InputLabel, Select, MenuItem
 } from '@mui/material';
 import axios from 'axios';
 import DownloadIcon from '@mui/icons-material/Download';
@@ -11,6 +11,8 @@ import EditIcon from '@mui/icons-material/Edit';
 
 const HistorialLlenados = () => {
   const [llenados, setLlenados] = useState([]);
+  const [empresas, setEmpresas] = useState([]);
+
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -23,10 +25,13 @@ const HistorialLlenados = () => {
     observaciones: ''
   });
 
-  const [openSnackbar, setOpenSnackbar] = useState(false); // 👈 Para mostrar el mensaje
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [openNuevaEmpresa, setOpenNuevaEmpresa] = useState(false);
+  const [nombreNuevaEmpresa, setNombreNuevaEmpresa] = useState('');
 
   useEffect(() => {
     fetchLlenados();
+    fetchEmpresas();
   }, []);
 
   const fetchLlenados = async () => {
@@ -35,6 +40,32 @@ const HistorialLlenados = () => {
       setLlenados(response.data);
     } catch (error) {
       console.error('Error al obtener llenados:', error);
+    }
+  };
+
+  const fetchEmpresas = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/api/empresas');
+      setEmpresas(response.data);
+    } catch (error) {
+      console.error('Error al obtener empresas:', error);
+    }
+  };
+
+  const handleCrearEmpresa = async () => {
+    try {
+      const res = await axios.post('http://localhost:3000/api/empresas', {
+        nombre: nombreNuevaEmpresa,
+      });
+      await fetchEmpresas();
+      setLlenadoSeleccionado((prev) => ({
+        ...prev,
+        empresa: res.data.nombre,
+      }));
+      setOpenNuevaEmpresa(false);
+      setNombreNuevaEmpresa('');
+    } catch (err) {
+      console.error('Error al crear empresa:', err);
     }
   };
 
@@ -84,6 +115,18 @@ const HistorialLlenados = () => {
     setOpenDialog(true);
   };
 
+  const handleNuevoLlenadoClick = () => {
+    const hoy = new Date().toISOString().split('T')[0];
+    setLlenadoSeleccionado({
+      id: null,
+      fecha: hoy,
+      empresa: '',
+      volumen: '',
+      observaciones: ''
+    });
+    setOpenDialog(true);
+  };
+
   const handleCloseDialog = () => {
     setOpenDialog(false);
   };
@@ -95,17 +138,17 @@ const HistorialLlenados = () => {
 
   const handleGuardar = async () => {
     try {
-      await axios.put(`http://localhost:3000/api/llenados/${llenadoSeleccionado.id}`, {
-        fecha: llenadoSeleccionado.fecha,
-        empresa: llenadoSeleccionado.empresa,
-        volumen: llenadoSeleccionado.volumen,
-        observaciones: llenadoSeleccionado.observaciones
-      });
-      fetchLlenados(); // Refrescar listado
-      setOpenDialog(false); // Cerrar modal
-      setOpenSnackbar(true); // 👈 Mostrar mensaje
+      if (llenadoSeleccionado.id) {
+        await axios.put(`http://localhost:3000/api/llenados/${llenadoSeleccionado.id}`, llenadoSeleccionado);
+      } else {
+        await axios.post(`http://localhost:3000/api/llenados`, llenadoSeleccionado);
+      }
+
+      fetchLlenados();
+      setOpenDialog(false);
+      setOpenSnackbar(true);
     } catch (error) {
-      console.error('Error al actualizar llenado:', error);
+      console.error('Error al guardar llenado:', error);
     }
   };
 
@@ -119,14 +162,15 @@ const HistorialLlenados = () => {
         Historial de Llenados
       </Typography>
 
-      {/* Botón Exportar */}
       <Stack direction="row" spacing={2} sx={{ justifyContent: 'center', mb: 4 }}>
         <Button variant="outlined" startIcon={<DownloadIcon />} onClick={exportarCSV}>
           Exportar CSV
         </Button>
+        <Button variant="contained" color="primary" onClick={handleNuevoLlenadoClick}>
+          Nuevo Llenado
+        </Button>
       </Stack>
 
-      {/* Tabla */}
       <Box
         sx={{
           maxWidth: '1000px',
@@ -172,7 +216,6 @@ const HistorialLlenados = () => {
             </TableBody>
           </Table>
 
-          {/* Paginación */}
           <TablePagination
             component="div"
             count={llenados.length}
@@ -186,9 +229,9 @@ const HistorialLlenados = () => {
         </TableContainer>
       </Box>
 
-      {/* Diálogo de edición */}
+      {/* Diálogo Crear/Editar llenado */}
       <Dialog open={openDialog} onClose={handleCloseDialog}>
-        <DialogTitle>Editar Llenado</DialogTitle>
+        <DialogTitle>{llenadoSeleccionado.id ? 'Editar Llenado' : 'Nuevo Llenado'}</DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
           <TextField
             label="Fecha"
@@ -198,15 +241,32 @@ const HistorialLlenados = () => {
             onChange={handleInputChange}
             InputLabelProps={{ shrink: true }}
             fullWidth
-            sx={{ mt: 2 }}
           />
-          <TextField
-            label="Empresa"
-            name="empresa"
-            value={llenadoSeleccionado.empresa}
-            onChange={handleInputChange}
-            fullWidth
-          />
+          <FormControl fullWidth>
+            <InputLabel id="empresa-label">Empresa</InputLabel>
+            <Select
+              labelId="empresa-label"
+              name="empresa"
+              value={llenadoSeleccionado.empresa}
+              onChange={(e) => {
+                if (e.target.value === '__nueva__') {
+                  setOpenNuevaEmpresa(true);
+                } else {
+                  handleInputChange(e);
+                }
+              }}
+              label="Empresa"
+            >
+              {empresas.map((empresa) => (
+                <MenuItem key={empresa.id} value={empresa.nombre}>
+                  {empresa.nombre}
+                </MenuItem>
+              ))}
+              <MenuItem value="__nueva__" sx={{ fontStyle: 'italic', color: 'primary.main' }}>
+                + Crear nueva empresa
+              </MenuItem>
+            </Select>
+          </FormControl>
           <TextField
             label="Volumen (lts)"
             name="volumen"
@@ -231,10 +291,31 @@ const HistorialLlenados = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Snackbar de éxito */}
+      {/* Diálogo para nueva empresa */}
+      <Dialog open={openNuevaEmpresa} onClose={() => setOpenNuevaEmpresa(false)}>
+        <DialogTitle>Nueva Empresa</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Nombre de la empresa"
+            fullWidth
+            value={nombreNuevaEmpresa}
+            onChange={(e) => setNombreNuevaEmpresa(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenNuevaEmpresa(false)}>Cancelar</Button>
+          <Button onClick={handleCrearEmpresa} disabled={!nombreNuevaEmpresa.trim()}>
+            Crear
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar */}
       <Snackbar open={openSnackbar} autoHideDuration={3000} onClose={handleCloseSnackbar}>
         <Alert onClose={handleCloseSnackbar} severity="success" sx={{ width: '100%' }}>
-          Llenado actualizado correctamente.
+          Llenado {llenadoSeleccionado.id ? 'actualizado' : 'registrado'} correctamente.
         </Alert>
       </Snackbar>
     </Box>

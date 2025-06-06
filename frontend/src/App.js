@@ -10,9 +10,11 @@ import Ubicacion from './pages/Ubicacion'; // 👉 Nueva importación
 import Cisternas from './pages/Cisternas';
 import Turnos from './pages/Turnos';
 import Asistente from './pages/Asistente';
+import Eventos from './pages/Eventos';
 import { Box } from '@mui/material';
 import { ToastContainer } from 'react-toastify'; // 👈 Importar Toastify
 import 'react-toastify/dist/ReactToastify.css'; // 👈 Estilos de Toastify
+import Empresas from './pages/Empresas';
 
 
 
@@ -42,6 +44,8 @@ const App = () => {
             <Route path="/cisternas" element={<Cisternas />} />
             <Route path="/turnos" element={<Turnos />} />
             <Route path="/asistente" element={<Asistente />} />
+            <Route path="/eventos" element={<Eventos />} />
+            <Route path="/empresas" element={<Empresas />} />
           </Routes>
         </Box>
       </Box>

@@ -9,6 +9,8 @@ const llenadoRoutes = require('./routes/llenadoRoutes');
 const deviceRoutes = require('./routes/deviceRoutes');
 const turnoRoutes = require('./routes/turnoRoutes');
 const iaRoutes = require('./routes/iaRoutes');
+const eventosRoutes = require('./routes/eventosRoutes');
+const empresaRoutes = require('./routes/empresaRoutes');
 const path = require('path');
 const { iniciarTareaCron } = require('./controllers/cronController');
 
@@ -25,6 +27,9 @@ app.use('/api/llenados', llenadoRoutes);
 app.use('/api', deviceRoutes);
 app.use('/turnos', turnoRoutes);
 app.use('/api', iaRoutes);
+app.use('/eventos', eventosRoutes);
+app.use('/api/empresas', empresaRoutes);
+
 
 // ✅ Cambio acá:
 app.get('/', (req, res) => {

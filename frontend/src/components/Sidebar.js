@@ -13,7 +13,8 @@ import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import WaterIcon from '@mui/icons-material/WaterDrop';
 import EventNoteIcon from '@mui/icons-material/EventNote';
-import SmartToyIcon from '@mui/icons-material/SmartToy'; // 👈 Ícono para Asistente IA
+import SmartToyIcon from '@mui/icons-material/SmartToy';
+import BusinessIcon from '@mui/icons-material/Business'; // 👈 ícono para Empresas
 
 const Sidebar = () => {
   const [open, setOpen] = useState(true);
@@ -32,7 +33,9 @@ const Sidebar = () => {
     { text: 'Ubicación', icon: <LocationOnIcon />, path: '/ubicacion' },
     { text: 'Cisternas', icon: <WaterIcon />, path: '/cisternas' },
     { text: 'Turnos', icon: <EventNoteIcon />, path: '/turnos' },
-    { text: 'Asistente IA', icon: <SmartToyIcon />, path: '/asistente' } // ✅ NUEVA OPCIÓN
+    { text: 'Eventos de Consumo', icon: <EventNoteIcon />, path: '/eventos' },
+    { text: 'Empresas', icon: <BusinessIcon />, path: '/empresas' }, // ✅ nuevo ítem agregado
+    { text: 'Asistente IA', icon: <SmartToyIcon />, path: '/asistente' }
   ];
 
   return (
